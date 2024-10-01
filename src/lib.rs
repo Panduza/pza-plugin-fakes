@@ -1,12 +1,16 @@
-use std::{sync::{Arc, Mutex}, thread::{self, JoinHandle}, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    thread::{self, JoinHandle},
+    time::Duration,
+};
 
-use panduza_platform_core::{Plugin, Producer};
+use panduza_platform_core::{Factory, Plugin, Producer};
 use tokio::time::sleep;
 
+static mut tesst: Option<Arc<Mutex<u32>>> = None;
+static mut FACTORY: Option<Arc<Mutex<Factory>>> = None;
 
-static mut tesst : Option<Arc<Mutex<u32>>> = None;
-static mut handle : Option<JoinHandle<()>> = None;
-
+static mut handle: Option<JoinHandle<()>> = None;
 
 async fn counter() {
     loop {
@@ -18,13 +22,9 @@ async fn counter() {
 
 #[tokio::main]
 async fn runForever() {
-    let counterTask = tokio::spawn(
-        counter()
-    );
+    let counterTask = tokio::spawn(counter());
     tokio::try_join!(counterTask).unwrap();
-
 }
-
 
 pub extern "C" fn pok() {
     println!("pooook");
@@ -32,37 +32,36 @@ pub extern "C" fn pok() {
     let _handle: JoinHandle<()> = thread::spawn(move || {
         println!("Trying to create new thread for Tokio runtime");
         runForever();
-    }
-        // counter()
-        // || {
-        // some work here
-        // println!("Trying to create new thread for Tokio runtime");
-        // runForever();
+    });
 
-    // }
-    );
-
-    unsafe  {
-        handle = Some( _handle );
+    unsafe {
+        handle = Some(_handle);
     }
-    
 
     // handle.join().unwrap();
 }
 
-
 pub extern "C" fn join() {
     unsafe {
-        handle.take().unwrap().join().unwrap();        
+        handle.take().unwrap().join().unwrap();
     }
 }
 
-
 #[no_mangle]
 pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
+    // if factory none
+    // init factory
+    let mut factory = Factory::new();
+    factory.add_producers(plugin_producers());
+    unsafe {
+        FACTORY = Some(Arc::new(Mutex::new(factory)));
+    }
 
+    // if reactor none
+    // init reactor
 
-    
+    // build runtine
+
     let p = Plugin::new("tok", "v0.1", pok, join);
 
     // println!("pp {:?}", *(p.name) as u8);
@@ -70,11 +69,14 @@ pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
     return p;
 }
 
-
-// Export the producers of the plugin
 //
+// Import modules
+mod register_map;
+
+//
+// Export the producers of the plugin
 pub fn plugin_producers() -> Vec<Box<dyn Producer>> {
     let mut producers: Vec<Box<dyn Producer>> = vec![];
-    // producers.push(dio::producer::PiochaDio::new());
+    producers.push(register_map::producer::RegisterMapProducer::new());
     return producers;
 }
