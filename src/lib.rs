@@ -62,7 +62,7 @@ pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
 
     // build runtine
 
-    let p = Plugin::new("tok", "v0.1", pok, join);
+    let p = Plugin::new(c"tok", c"v0.1", pok, join);
 
     // println!("pp {:?}", *(p.name) as u8);
 
