@@ -1,6 +1,6 @@
 use std::{sync::{Arc, Mutex}, thread::{self, JoinHandle}, time::Duration};
 
-use panduza_platform_core::Plugin;
+use panduza_platform_core::{Plugin, Producer};
 use tokio::time::sleep;
 
 
@@ -70,3 +70,11 @@ pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
     return p;
 }
 
+
+// Export the producers of the plugin
+//
+pub fn plugin_producers() -> Vec<Box<dyn Producer>> {
+    let mut producers: Vec<Box<dyn Producer>> = vec![];
+    // producers.push(dio::producer::PiochaDio::new());
+    return producers;
+}
