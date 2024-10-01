@@ -47,6 +47,8 @@ pub extern "C" fn join() {
     }
 }
 
+pub extern "C" fn produce(str_production_order: *const i8) {}
+
 #[no_mangle]
 pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
     // if factory none
@@ -62,7 +64,7 @@ pub unsafe extern "C" fn plugin_entry_point() -> Plugin {
 
     // build runtine
 
-    let p = Plugin::new(c"tok", c"v0.1", pok, join);
+    let p = Plugin::new(c"tok", c"v0.1", pok, join, produce);
 
     // println!("pp {:?}", *(p.name) as u8);
 
