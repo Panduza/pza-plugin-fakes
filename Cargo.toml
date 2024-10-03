@@ -9,14 +9,47 @@ crate-type = ["cdylib"]
 
 [dependencies]
 
-panduza-platform-core = { path = "C:/Users/rodriguez.NET/Documents/workspace/50-PROJET/XX-XXXX-PZA/panduza-platform-core" }
+panduza-platform-core = { path = "C:/Users/rodriguez.NET/Documents/workspace/50-PROJET/XX-XXXX-PZA/panduza-platform-core", features = [
+    "log",
+] }
 
 
 # Main async framework for the platform
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
 # Json serialization & deserialization
 serde_json = "1.0.114"
 # Async trait support
 async-trait = "0.1.77"
 # Futures support
 futures = "0.3.17"
+
+
+rand = "0.8.5"
+
+
+# Trace instrumentation at disabled levels will be skipped and will not even be present
+# in the resulting binary unless the verbosity level is specified dynamically.
+# This level is configured separately for release and debug builds.
+tracing = { version = "0.1", features = [
+    # "max_level_off",
+    # "max_level_error",
+    # "max_level_warn",
+    # "max_level_info",
+    # "max_level_debug",
+    "max_level_trace",
+    # "release_max_level_off",
+    # "release_max_level_error",
+    # "release_max_level_warn",
+    "release_max_level_info",
+    # "release_max_level_debug",
+    # "release_max_level_trace"
+] }
+
+# 
+tracing-core = { version = "0.1.32" }
+
+
+[features]
+
+# Enable tracing in stdout
+log = []
