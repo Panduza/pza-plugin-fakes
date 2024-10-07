@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 
-panduza-platform-core = { path = "C:/Users/rodriguez.NET/Documents/workspace/50-PROJET/XX-XXXX-PZA/panduza-platform-core", features = [
+panduza-platform-core = { path = "C:/Users/xavie/workspace/panduza-platform-core", features = [
     "log",
 ] }
 
