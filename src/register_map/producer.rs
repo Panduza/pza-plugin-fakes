@@ -23,28 +23,6 @@ impl Producer for RegisterMapProducer {
     }
 }
 
-pub struct RegisterMapProducer2 {}
-
-impl RegisterMapProducer2 {
-    pub fn new() -> Box<RegisterMapProducer2> {
-        Box::new(RegisterMapProducer2 {})
-    }
-}
-
-impl Producer for RegisterMapProducer2 {
-    fn manufacturer(&self) -> String {
-        "panduza".to_string()
-    }
-
-    fn model(&self) -> String {
-        "fake_register_map2".to_string()
-    }
-
-    fn produce(&self) -> Result<Box<dyn DeviceOperations>, panduza_platform_core::Error> {
-        return Ok(Box::new(RegisterMapDevice::new()));
-    }
-}
-
 // impl Into<Box<RegisterMapProducer>> for RegisterMapProducer {
 //     fn into(self) -> Box<RegisterMapProducer> {
 //         Box::new(self)
