@@ -114,7 +114,7 @@ impl DeviceOperations for RegisterMapDevice {
     /// Mount the device
     ///
     async fn mount(&mut self, device: Device) -> Result<(), Error> {
-        return Err(Error::Wtf);
+        // return Err(Error::Wtf);
 
         //
         // First create registers because command will need them
