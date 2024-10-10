@@ -3,9 +3,9 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
-    let CRATE_OUT_DIR = std::env::var("CRATE_OUT_DIR").unwrap();
+    let crate_out_dir = std::env::var("CRATE_OUT_DIR").unwrap();
 
-    let lib_path = PathBuf::from(CRATE_OUT_DIR).join("pza_plugin_fakes.dll");
+    let lib_path = PathBuf::from(crate_out_dir).join("pza_plugin_fakes.dll");
 
     let system_plugins_dir = env::system_default_plugins_dir().unwrap();
 

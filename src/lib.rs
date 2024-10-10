@@ -1,4 +1,4 @@
-panduza_platform_core::plugin_interface!();
+panduza_platform_core::plugin_interface!("pza-plugin-fakes");
 
 //
 // Import modules
