@@ -89,7 +89,7 @@ impl RegisterMapDevice {
 
         //
         // Register interface
-        let mut interface = device.create_interface("registers").finish().await;
+        let mut interface = device.create_interface("registers").finish();
 
         //
         // Create 20 register
