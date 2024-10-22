@@ -9,10 +9,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 
-panduza-platform-core = { path = "C:/Users/rodriguez.NET/Documents/workspace/50-PROJET/XX-XXXX-PZA/panduza-platform-core", features = [
+panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", branch = "main", features = [
     "log",
 ] }
-
 
 # Main async framework for the platform
 tokio = { version = "1.40.0", features = ["full"] }
@@ -50,8 +49,7 @@ tracing-core = { version = "0.1.32" }
 
 [package.metadata.cargo-post.dependencies]
 
-
-panduza-platform-core = { path = "C:/Users/rodriguez.NET/Documents/workspace/50-PROJET/XX-XXXX-PZA/panduza-platform-core", features = [
+panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", features = [
     "log",
 ] }
 
