@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use panduza_platform_core::{
-    spawn_on_command, AttOnlyMsgAtt, BidirMsgAtt, Device, DeviceLogger, DeviceOperations, Error,
-    MemoryCommandCodec, MemoryCommandMode, NumberCodec, TaskResult,
+    spawn_on_command, DriverOperations, Error, Instance, InstanceLogger, MemoryCommandAttServer,
+    MemoryCommandMode, NumberAttServer, TaskResult,
 };
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
@@ -13,8 +13,8 @@ static mut COUNTER: u16 = 0;
 /// This device is a simulation of a register map that you can access through commands
 ///
 pub struct RegisterMapDevice {
-    logger: Option<DeviceLogger>,
-    array: Arc<Vec<AttOnlyMsgAtt<NumberCodec>>>,
+    logger: Option<InstanceLogger>,
+    array: Arc<Vec<NumberAttServer>>,
 }
 
 impl RegisterMapDevice {
@@ -32,9 +32,9 @@ impl RegisterMapDevice {
     /// Triggered when a new command is received
     ///
     async fn on_command_action(
-        logger: DeviceLogger,
-        array: Arc<Vec<AttOnlyMsgAtt<NumberCodec>>>,
-        mut attr_command: BidirMsgAtt<MemoryCommandCodec>,
+        logger: InstanceLogger,
+        array: Arc<Vec<NumberAttServer>>,
+        mut attr_command: MemoryCommandAttServer,
     ) -> TaskResult {
         while let Some(command) = attr_command.pop_cmd().await {
             logger.debug(format!("New command {:?}", command));
@@ -44,7 +44,7 @@ impl RegisterMapDevice {
                     let idx = command.address;
                     unsafe {
                         COUNTER += 1;
-                        array[idx as usize].set(COUNTER).await?;
+                        array[idx as usize].set_from_i64(COUNTER.into()).await?;
                     }
                 }
                 MemoryCommandMode::Write => {}
@@ -58,38 +58,42 @@ impl RegisterMapDevice {
     ///
     /// Register map can be updated through memory command
     ///
-    async fn create_memory_command_attribute(&mut self, mut device: Device) {
+    async fn create_memory_command_attribute(
+        &mut self,
+        mut instance: Instance,
+    ) -> Result<(), Error> {
         //
         // Create the attribute
-        let attr_command = device
+        let attr_command = instance
             .create_attribute("command")
-            .message()
-            .with_bidir_access()
-            .finish_with_codec::<MemoryCommandCodec>()
-            .await;
+            .with_rw()
+            .finish_as_memory_command()
+            .await?;
 
         //
         // Execute action on each command received
         let logger = self.logger.as_ref().unwrap().clone();
         let array = self.array.clone();
         spawn_on_command!(
-            device,
+            instance,
             attr_command,
             Self::on_command_action(logger.clone(), array.clone(), attr_command.clone())
         );
+
+        Ok(())
     }
 
     ///
     ///
     ///
-    async fn create_registers(&mut self, mut device: Device) {
+    async fn create_registers(&mut self, mut instance: Instance) -> Result<(), Error> {
         //
         // Get the logger
-        self.logger = Some(device.logger.clone());
+        self.logger = Some(instance.logger.clone());
 
         //
         // Register interface
-        let mut interface = device.create_interface("registers").finish();
+        let mut interface = instance.create_class("registers").finish();
 
         //
         // Create 20 register
@@ -97,38 +101,40 @@ impl RegisterMapDevice {
         for n in 0..20 {
             let a = interface
                 .create_attribute(format!("{}", n))
-                .message()
-                .with_att_only_access()
-                .finish_with_codec::<NumberCodec>()
-                .await;
-            a.set(2).await.unwrap();
+                .with_ro()
+                .finish_as_number()
+                .await?;
+            a.set_from_i64(2).await.unwrap();
             array.push(a);
         }
         self.array = Arc::new(array);
+
+        Ok(())
     }
 }
 
 #[async_trait]
-impl DeviceOperations for RegisterMapDevice {
+impl DriverOperations for RegisterMapDevice {
     ///
     /// Mount the device
     ///
-    async fn mount(&mut self, device: Device) -> Result<(), Error> {
+    async fn mount(&mut self, instance: Instance) -> Result<(), Error> {
         // return Err(Error::Wtf);
 
         //
         // First create registers because command will need them
-        self.create_registers(device.clone()).await;
+        self.create_registers(instance.clone()).await?;
         //
         // Create command
-        self.create_memory_command_attribute(device.clone()).await;
+        self.create_memory_command_attribute(instance.clone())
+            .await?;
         Ok(())
     }
 
     ///
     /// Easiest way to implement the reboot event
     ///
-    async fn wait_reboot_event(&mut self, _: Device) {
+    async fn wait_reboot_event(&mut self, _: Instance) {
         sleep(Duration::from_secs(5)).await;
     }
 }

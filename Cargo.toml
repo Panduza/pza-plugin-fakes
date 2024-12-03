@@ -1,20 +1,20 @@
 [package]
 name = "pza-plugin-fakes"
 edition = "2021"
+version = "0.1.0"
 
 [lib]
 path = "src/lib.rs"
-crate-type = ["cdylib"]
-
+crate-type = ["lib", "cdylib"]
 
 [dependencies]
-
-panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", branch = "main", features = [
-    "log",
+# The panduza core library
+panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", tag = "0.1.5", features = [
+    "serial",
 ] }
-
+# The panduza connectors library
 # Main async framework for the platform
-tokio = { version = "1.40.0", features = ["full"] }
+tokio = { version = "1", features = ["full", "tracing"] }
 # Json serialization & deserialization
 serde_json = "1.0.114"
 # Async trait support
@@ -22,39 +22,16 @@ async-trait = "0.1.77"
 # Futures support
 futures = "0.3.17"
 
-
-rand = "0.8.5"
-
-
-# Trace instrumentation at disabled levels will be skipped and will not even be present
-# in the resulting binary unless the verbosity level is specified dynamically.
-# This level is configured separately for release and debug builds.
-tracing = { version = "0.1", features = [
-    # "max_level_off",
-    # "max_level_error",
-    # "max_level_warn",
-    # "max_level_info",
-    # "max_level_debug",
-    "max_level_trace",
-    # "release_max_level_off",
-    # "release_max_level_error",
-    # "release_max_level_warn",
-    "release_max_level_info",
-    # "release_max_level_debug",
-    # "release_max_level_trace"
-] }
-
-# 
-tracing-core = { version = "0.1.32" }
-
 [package.metadata.cargo-post.dependencies]
+# Only for env paths
+panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", tag = "0.1.5" }
 
-panduza-platform-core = { git = "https://github.com/Panduza/panduza-platform-core", features = [
-    "log",
-] }
-
+[build-dependencies]
+# 
+prost-build = { version = "0.13.1" }
 
 [features]
 
-# Enable tracing in stdout
-log = []
+# Enable this if you want to build this driver as a dynamic plugin
+# 
+plugin = []
